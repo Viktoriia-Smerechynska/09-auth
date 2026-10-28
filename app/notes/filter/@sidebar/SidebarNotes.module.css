@@ -1,0 +1,37 @@
+/* src/app/notes/filter/@sidebar/SidebarNotes.module.css */
+
+.menuList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.menuItem {
+  display: block;
+}
+
+.menuLink {
+  display: block;
+  padding: 10px 16px;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.menuLink:hover {
+  background-color: #343a40;
+  color: #dae4ff;
+}
+
+.activeLink {
+  background-color: #0d6efd;
+  color: #ffffff !important;
+  font-weight: 600;
+}
