@@ -7,17 +7,8 @@ export type NoteListResponse = {
   totalPages: number;
 };
 
-const KEY = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
-const headers: Record<string, string> = {};
-
-if (KEY) {
-  const cleanKey = KEY.replace(/['"]/g, '').trim();
-  headers['Authorization'] = `Bearer ${cleanKey}`;
-}
-
 export const api = axios.create({
-  baseURL: 'https://notehub-public.goit.study/api',
-  headers,
+  baseURL: '/api',
 });
 
 export const fetchNotes = async (page: number = 1, searchQuery: string = '', tag: string = '') => {

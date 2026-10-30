@@ -1,4 +1,5 @@
 import TanStackProvider from '@/components/TanStackProvider/TanStackProvider';
+import AuthProvider from '@/components/AuthProvider/AuthProvider';
 import type { Metadata } from 'next';
 import { Roboto } from 'next/font/google';
 import React from 'react';
@@ -44,14 +45,17 @@ export default function RootLayout({ children, modal }: RootLayoutProps) {
       {}
       <body className={`${roboto.variable} ${roboto.className}`}>
         <TanStackProvider>
-          <Header />
-
-          <main>{children}</main>
-
           {}
-          {modal}
+          <AuthProvider>
+            <Header />
 
-          <Footer />
+            <main>{children}</main>
+
+            {}
+            {modal}
+
+            <Footer />
+          </AuthProvider>
         </TanStackProvider>
       </body>
     </html>

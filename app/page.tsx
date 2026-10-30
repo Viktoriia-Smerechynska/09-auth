@@ -1,4 +1,4 @@
-import css from './Home.module.css';
+import css from './(private routes)/notes/Home.module.css';
 
 export default function Home() {
   return (

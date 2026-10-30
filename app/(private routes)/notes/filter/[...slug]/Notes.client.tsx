@@ -5,9 +5,9 @@ import { useState, useEffect } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import Link from 'next/link';
-import css from '../../../Home.module.css';
+import css from '@/app/(private routes)/notes/Home.module.css';
 
-import { fetchNotes } from '@/lib/api';
+import { fetchNotes, createNote } from '@/lib/api/clientApi';
 
 import NoteList from '@/components/NoteList/NoteList';
 import Pagination from '@/components/Pagination/Pagination';

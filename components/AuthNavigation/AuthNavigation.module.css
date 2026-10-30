@@ -1,0 +1,42 @@
+/* components/AuthNavigation/AuthNavigation.module.css */
+
+.navigationItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navigationLink {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.navigationLink:hover {
+  color: #0d6efd;
+}
+
+.userEmail {
+  color: #aaa;
+  font-size: 14px;
+  margin: 0;
+}
+
+.logoutButton {
+  background: none;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.logoutButton:hover {
+  background-color: #dc3545;
+  color: white;
+}

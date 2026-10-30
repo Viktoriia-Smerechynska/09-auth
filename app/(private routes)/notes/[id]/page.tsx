@@ -1,6 +1,6 @@
 // src/app/notes/[id]/page.tsx
 import type { Metadata } from 'next';
-import { fetchNoteById } from '@/lib/api';
+import { fetchNoteById } from '@/lib/api/serverApi';
 import NoteDetailsClient from './NoteDetails.client';
 
 interface NoteDetailPageProps {
