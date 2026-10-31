@@ -1,10 +1,10 @@
-// middleware.ts
+// proxy.ts
 import { NextResponse, type NextRequest } from 'next/server';
 
 const privateRoutes = ['/profile', '/notes'];
 const publicRoutes = ['/sign-in', '/sign-up'];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { nextUrl, cookies } = request;
   const currentPath = nextUrl.pathname;
 
