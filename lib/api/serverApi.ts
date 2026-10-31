@@ -47,5 +47,6 @@ export const getMe = async () => {
 export const checkSession = async () => {
   const config = await getServerHeaders();
   const res = await api.get('/auth/session', config);
-  return res.data;
+
+  return res;
 };
