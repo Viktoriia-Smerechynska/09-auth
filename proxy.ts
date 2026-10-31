@@ -1,6 +1,6 @@
-// proxy.ts
 import { NextResponse, type NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
+import { parseSetCookie } from 'cookie';
 import { checkSession } from './lib/api/serverApi';
 
 const privateRoutes = ['/profile', '/notes'];
@@ -8,25 +8,36 @@ const publicRoutes = ['/sign-in', '/sign-up'];
 
 export async function proxy(request: NextRequest) {
   const currentPath = request.nextUrl.pathname;
-
   const cookieStore = await cookies();
 
-  let accessToken = cookieStore.get('accessToken')?.value;
+  const accessToken = cookieStore.get('accessToken')?.value;
   const refreshToken = cookieStore.get('refreshToken')?.value;
 
   let isAuthenticated = !!accessToken;
-  let newCookiesToSet: string[] = [];
+
+  let newAccessToken: string | undefined = undefined;
+  let newRefreshToken: string | undefined = undefined;
 
   if (!accessToken && refreshToken) {
     try {
-      const sessionData = await checkSession();
+      const response = await checkSession();
 
-      if (sessionData) {
+      if (response && response.status === 200) {
         isAuthenticated = true;
 
-        const updatedAccessToken = cookieStore.get('accessToken')?.value;
-        if (updatedAccessToken) {
-          accessToken = updatedAccessToken;
+        const setCookieHeaders = response.headers['set-cookie'];
+
+        if (setCookieHeaders && setCookieHeaders.length > 0) {
+          setCookieHeaders.forEach(cookieStr => {
+            const parsed = parseSetCookie(cookieStr);
+
+            if (parsed.name === 'accessToken') {
+              newAccessToken = parsed.value;
+            }
+            if (parsed.name === 'refreshToken') {
+              newRefreshToken = parsed.value;
+            }
+          });
         }
       }
     } catch (error) {
@@ -45,24 +56,27 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  const response = NextResponse.next();
+  const finalResponse = NextResponse.next();
 
-  if (accessToken) {
-    response.cookies.set('accessToken', accessToken, {
+  if (newAccessToken) {
+    finalResponse.cookies.set('accessToken', newAccessToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-    });
-  }
-  if (refreshToken) {
-    response.cookies.set('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
+      path: '/',
     });
   }
 
-  return response;
+  if (newRefreshToken) {
+    finalResponse.cookies.set('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+  }
+
+  return finalResponse;
 }
 
 export const config = {
