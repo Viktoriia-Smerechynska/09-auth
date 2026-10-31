@@ -1,3 +1,4 @@
+// proxy.ts
 import { NextResponse, type NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import { parseSetCookie } from 'cookie';
@@ -17,6 +18,7 @@ export async function proxy(request: NextRequest) {
 
   let newAccessToken: string | undefined = undefined;
   let newRefreshToken: string | undefined = undefined;
+  let shouldClearCookies = false;
 
   if (!accessToken && refreshToken) {
     try {
@@ -25,9 +27,11 @@ export async function proxy(request: NextRequest) {
       if (response && response.status === 200) {
         isAuthenticated = true;
 
-        const setCookieHeaders = response.headers['set-cookie'];
+        const rawSetCookie = response.headers['set-cookie'];
 
-        if (setCookieHeaders && setCookieHeaders.length > 0) {
+        if (rawSetCookie) {
+          const setCookieHeaders = Array.isArray(rawSetCookie) ? rawSetCookie : [rawSetCookie];
+
           setCookieHeaders.forEach(cookieStr => {
             const parsed = parseSetCookie(cookieStr);
 
@@ -39,16 +43,27 @@ export async function proxy(request: NextRequest) {
             }
           });
         }
+      } else {
+        isAuthenticated = false;
+        shouldClearCookies = true;
       }
     } catch (error) {
       console.error('Failed to refresh session in middleware proxy:', error);
       isAuthenticated = false;
+
+      shouldClearCookies = true;
     }
   }
 
   const isPrivateRoute = privateRoutes.some(route => currentPath.startsWith(route));
   if (isPrivateRoute && !isAuthenticated) {
-    return NextResponse.redirect(new URL('/sign-in', request.url));
+    const redirectResponse = NextResponse.redirect(new URL('/sign-in', request.url));
+
+    if (shouldClearCookies) {
+      redirectResponse.cookies.delete('accessToken');
+      redirectResponse.cookies.delete('refreshToken');
+    }
+    return redirectResponse;
   }
 
   const isPublicRoute = publicRoutes.some(route => currentPath.startsWith(route));
@@ -57,6 +72,12 @@ export async function proxy(request: NextRequest) {
   }
 
   const finalResponse = NextResponse.next();
+
+  if (shouldClearCookies) {
+    finalResponse.cookies.delete('accessToken');
+    finalResponse.cookies.delete('refreshToken');
+    return finalResponse;
+  }
 
   if (newAccessToken) {
     finalResponse.cookies.set('accessToken', newAccessToken, {
